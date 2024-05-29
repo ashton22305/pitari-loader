@@ -1,4 +1,8 @@
 from gpiozero import DigitalInputDevice, DigitalOutputDevice
+from time import sleep
+
+#TODO: Figure out if there's a way to tell whether the cartridge needs bank switched
+ROM_SIZE = 4096
 
 # Define pins
 #TODO: Define some kind of schema?
@@ -23,7 +27,16 @@ class ByteReader:
             else:
                 pin.off()
 
-        result = 0
+        # Give the circuit time to settle
+        sleep(0.01)
+
+        byte = 0
         for pin, bit in self.input_pins:
             value = pin.is_active()
-            result += value << bit
+            byte += value << bit
+        
+        return byte
+
+    def read_rom(self):
+        #TODO: Insert some kinda check that a cartridge is inserted
+        return [self.read_byte(i) for i in range(ROM_SIZE)]
